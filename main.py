@@ -19,11 +19,15 @@ ENTRY = (
 
 def main() -> None:
     assert 1 <= len(ENTRY) <= 400, f"entry is {len(ENTRY)} chars"
+    assert ENTRY.count(".") >= 2, "entry must be two sentences"
     out_dir = os.environ.get("OUTPUT_DIR", "/output")
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8", newline="") as f:
+    # Write atomically so a crash can never leave a partial entry behind.
+    tmp_path = path + ".tmp"
+    with open(tmp_path, "w", encoding="utf-8", newline="") as f:
         f.write(ENTRY)
+    os.replace(tmp_path, path)
 
 
 if __name__ == "__main__":
